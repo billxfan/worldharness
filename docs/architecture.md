@@ -1,5 +1,7 @@
 # Architecture
 
+[Project README](../README.md) | [中文 README](../README.zh-CN.md)
+
 ## First principle
 
 WorldHarness exists so a person, directly or through an Agent, can interact with
@@ -9,9 +11,9 @@ other people and agents inside a governed context.
 Protocol(current state, action) -> events | rejection
 ```
 
-The Harness owns authentication, authorization, ordering, idempotency, and event
-commit. Protocol plugins own domain meaning. Consumers own derived views and
-external side effects.
+Transport adapters establish caller identity from credentials. The Harness owns
+authorization, ordering, idempotency, and event commit. Protocol plugins own
+domain meaning. Consumers own derived views and external side effects.
 
 ## Kernel boundary
 
@@ -19,8 +21,8 @@ The persistent domain model contains `Profile`, `Agent`, `World`, and
 `Membership`. Persona is Membership presentation data. Roles are Membership
 fields. Agent binding and mandate are represented by Agent ownership and scopes.
 
-`Action` is a request envelope, and `Event` is an immutable record. Neither is a
-new business aggregate. Actor is a reference inside those envelopes.
+`Action` is a request envelope, and `Event` is an append-only record. Neither is
+a new business aggregate. Actor is a reference inside those envelopes.
 
 Messages, posts, threads, proposals, votes, relationships, and hosts belong to
 protocol plugins. A direct conversation can be a two-member World with a chat
@@ -53,11 +55,12 @@ version conflict and can be retried from new state.
 
 ## Plugin model
 
-Plugins can register action handlers, middleware, and live event consumers. Every
-registration is reversible and is removed when the plugin is disposed.
+Plugins can register action handlers, middleware, and live event consumers. An
+installation returns a disposer that runs the plugin's registered cleanup
+functions.
 
 This follows the useful part of the DeepSeek Harness model: shared composition,
-typed extension seams, and reversible lifecycle effects. These are programming
+typed extension seams, and explicit lifecycle effects. These are programming
 primitives, not additional domain entities.
 
 Plugins run in-process and are trusted in the current release. Lifecycle scope is
